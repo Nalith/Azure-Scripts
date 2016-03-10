@@ -1,7 +1,6 @@
 #
 # CreateCopySnapshot.ps1
 #
-#Version 0.1
 Param(
 	#Subscription name of the VM.
 	[Parameter(Mandatory=$true,Position=1)]
@@ -27,10 +26,31 @@ Param(
 #Declare variables
 $DRSnapshots = @{}
 $InitialVMPowerState = ""
-$XMLPath = "C:\Azure DR XML\"
+$XMLPath = "C:\Azure DR XML"
 $DstStorageAccountContainerName = "vhds"
 
 #Functions
+function LogToFile([int]$stepnumber, [string]$outputtext)
+{
+	$date = Get-Date
+	$datestr = $date.ToShortDateString() + " " + $date.ToShortTimeString()
+
+	if((Test-Path -Path $XMLPath) -eq $false)
+	{
+		New-Item -Path $XMLPath -ItemType Directory
+	}
+
+	if($stepnumber -ige 0)
+	{
+		Add-Content -Path "$XMLPath\$AzureVMName.log" "[$datestr] Step $stepnumber`: $outputtext"
+	}
+	else
+	{
+		Add-Content -Path "$XMLPath\$AzureVMName.log" "[$datestr]`: $outputtext"
+	}
+	
+}
+
 function CenterText([string]$text, [int]$width, [string]$padCharLeft = ' ', [string]$padCharRight = '')
 {
     $output = $text
@@ -49,6 +69,7 @@ function Write-HostCustom([int]$stepnumber, [string]$outputtext)
 	$datestr = $date.ToShortDateString() + " " + $date.ToShortTimeString() 
 	Write-Host "[$datestr] Step $stepnumber`: " -NoNewline -ForegroundColor Green
 	Write-Host $outputtext
+	LogToFile $stepnumber $outputtext
 }
 
 function Write-HostCustomHeader([string]$outputtext)
@@ -56,6 +77,7 @@ function Write-HostCustomHeader([string]$outputtext)
 	$outputtext = "$outputtext`:"
 	$outputtext = $outputtext.PadRight(150).ToUpper()
 	Write-Host $outputtext -ForegroundColor Black -BackgroundColor White
+	LogToFile -1 $outputtext
 }
 
 function Write-HostCustomSubHeader([string]$outputtext)
@@ -63,6 +85,7 @@ function Write-HostCustomSubHeader([string]$outputtext)
 	$outputtext = "$outputtext"
 	$outputtext = $outputtext.PadRight(140).ToUpper()
 	Write-Host $outputtext -ForegroundColor Black -BackgroundColor Gray
+	LogToFile -1 $outputtext
 }
 
 function Write-ErrorCustom([int]$stepnumber, [string]$outputtext)
@@ -71,6 +94,7 @@ function Write-ErrorCustom([int]$stepnumber, [string]$outputtext)
 	$datestr = $date.ToShortDateString() + " " + $date.ToShortTimeString() 
 	Write-Host "[$datestr] Step $stepnumber`: " -NoNewline -ForegroundColor Black -BackgroundColor Red
 	Write-Host $outputtext -ForegroundColor Black -BackgroundColor Red
+	LogToFile $stepnumber $outputtext
 }
 
 function Move-DRSnapshot($VMDisk, [string]$DRSnapshotDateTime)
