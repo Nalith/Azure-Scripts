@@ -37,7 +37,7 @@ function LogToFile([int]$stepnumber, [string]$outputtext)
 
 	if((Test-Path -Path $XMLPath) -eq $false)
 	{
-		New-Item -Path $XMLPath -ItemType Directory
+		New-Item -Path $XMLPath -ItemType Directory | Out-Null
 	}
 
 	if($stepnumber -ige 0)
@@ -201,7 +201,7 @@ function ExportAndUpdate-VMXML()
 
 	if((Test-Path -Path $XMLPath) -eq $false)
 	{
-    New-Item -Path $XMLPath -ItemType Directory
+    New-Item -Path $XMLPath -ItemType Directory | Out-Null
 	}
 
 	$XMLFilePath = "C:\Azure DR XML\$AzureVMName-DR.xml"
